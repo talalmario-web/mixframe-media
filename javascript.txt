@@ -1,0 +1,36 @@
+const express = require("express");
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
+
+const app = express();
+app.use(express.json());
+app.use(express.static("public"));
+
+const db = new sqlite3.Database("./database.db");
+
+db.run(`
+CREATE TABLE IF NOT EXISTS posts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content TEXT,
+  platform TEXT,
+  publish_at TEXT
+)`);
+
+app.post("/schedule", (req, res) => {
+  const { content, platform, publish_at } = req.body;
+
+  db.run(
+    "INSERT INTO posts (content, platform, publish_at) VALUES (?, ?, ?)",
+    [content, platform, publish_at],
+    () => res.json({ status: "ok" })
+  );
+});
+
+app.get("/posts", (req, res) => {
+  db.all("SELECT * FROM posts ORDER BY id DESC", [], (err, rows) => {
+    res.json(rows);
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Running on " + PORT));

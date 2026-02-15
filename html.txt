@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Mix Frame Scheduler</title>
+</head>
+<body>
+
+  <h1>جدولة المحتوى</h1>
+
+  <textarea id="content" placeholder="اكتب المحتوى"></textarea>
+  <br><br>
+
+  <select id="platform">
+    <option>TikTok</option>
+    <option>Instagram</option>
+    <option>YouTube</option>
+    <option>Facebook</option>
+  </select>
+
+  <br><br>
+
+  <input type="datetime-local" id="publish_at">
+  <br><br>
+
+  <button onclick="schedule()">جدولة</button>
+
+  <h2>المحتوى المجدول</h2>
+  <ul id="posts"></ul>
+
+<script>
+function loadPosts(){
+  fetch('/posts')
+    .then(r=>r.json())
+    .then(data=>{
+      const ul = document.getElementById('posts');
+      ul.innerHTML='';
+      data.forEach(p=>{
+        const li = document.createElement('li');
+        li.innerText = p.platform + " | " + p.publish_at + " | " + p.content;
+        ul.appendChild(li);
+      });
+    });
+}
+
+function schedule(){
+  fetch('/schedule',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      content:document.getElementById('content').value,
+      platform:document.getElementById('platform').value,
+      publish_at:document.getElementById('publish_at').value
+    })
+  }).then(()=>{
+    alert("تم الحفظ");
+    loadPosts();
+  });
+}
+
+loadPosts();
+</script>
+
+</body>
+</html>
